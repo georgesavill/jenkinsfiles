@@ -27,7 +27,7 @@ pipeline {
         stage('Deploy files'){
             steps{
                 dir('files'){
-                    println 'Copying files to active directory'
+                    println 'Copying files to ' + env.DeployLocation
                     pwsh 'sudo cp -R * $env:DeployLocation'
                 }
             }
