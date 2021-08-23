@@ -1,0 +1,44 @@
+#!groovy
+pipeline {
+    agent {
+        node {
+            label DestinationServer
+        }
+    }
+    stages {
+        stage('Start'){
+            steps{
+                dir('files'){
+                    println 'Ensuring workspace is empty'
+                    deleteDir()
+                }
+            }
+        }
+        stage('Clone repository from GitHub'){
+            steps{
+                dir('files') {
+                    println 'Cloning GitHub repository'
+                    script {
+                        pwsh 'git clone $env:GithubRepo'
+                    }
+                }
+            }
+        }
+        stage('Deploy files'){
+            steps{
+                dir('files'){
+                    println 'Copying files to active directory'
+                    pwsh 'sudo cp -R * $env:DeployLocation'
+                }
+            }
+        }
+        stage('Clean up'){
+            steps{
+                dir('files'){
+                    println 'Removing cloned GitHub repository'
+                    deleteDir()
+                }
+            }
+        }
+    }
+}
