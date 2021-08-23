@@ -19,7 +19,10 @@ pipeline {
                 dir('files') {
                     println 'Cloning GitHub repository'
                     script {
-                        pwsh 'git clone $env:GithubRepo'
+                        pwsh '''
+                            git clone $env:GithubRepo
+                            git checkout $env:GithubBranch
+                        '''
                     }
                 }
             }
