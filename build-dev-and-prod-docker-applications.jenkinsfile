@@ -29,8 +29,8 @@ pipeline {
                 dir('files'){
                     println 'Building dockerfile'
                     pwsh '''
-                        sudo docker build -f $env:DevDockerfileLocation -t $env.DevDockerContainerTag .
-                        sudo docker build -f $env:ProdDockerfileLocation --build-arg new_relic_license_key=$env:NewRelicLicenseKey -t $env.ProdDockerContainerTag .
+                        sudo docker build -f $env:DevDockerfileLocation -t $env:DevDockerContainerTag .
+                        sudo docker build -f $env:ProdDockerfileLocation --build-arg new_relic_license_key=$env:NewRelicLicenseKey -t $env:ProdDockerContainerTag .
                     '''
                 }
             }
@@ -40,8 +40,8 @@ pipeline {
                 dir('files'){
                     println 'Pushing docker container'
                     pwsh '''
-                        sudo docker push $env.DevDockerContainerTag
-                        sudo docker push $env.ProdDockerContainerTag
+                        sudo docker push $env:DevDockerContainerTag
+                        sudo docker push $env:ProdDockerContainerTag
                     '''
                 }
             }
