@@ -1,0 +1,58 @@
+#!groovy
+pipeline {
+    agent {
+        node {
+            label 'build-server'
+        }
+    }
+    stages {
+        stage('Start'){
+            steps{
+                dir('files'){
+                    println 'Ensuring workspace is empty'
+                    deleteDir()
+                }
+            }
+        }
+        stage('Clone repository from GitHub'){
+            steps{
+                dir('files') {
+                    println 'Cloning GitHub repository'
+                    script {
+                        pwsh 'git clone $env:GithubRepo -b $env:GithubBranch'
+                    }
+                }
+            }
+        }
+        stage('Build dev and prod dockerfiles'){
+            steps{
+                dir('files'){
+                    println 'Building dockerfile'
+                    pwsh '''
+                        sudo docker build -f $env:DevDockerfileLocation -t $env.DevDockerContainerTag .
+                        sudo docker build -f $env:ProdDockerfileLocation --build-arg new_relic_license_key=$env:NewRelicLicenseKey -t $env.ProdDockerContainerTag .
+                    '''
+                }
+            }
+        }
+        stage ('Push dev and prod docker containers'){
+            steps{
+                dir('files'){
+                    println 'Pushing docker container'
+                    pwsh '''
+                        sudo docker push $env.DevDockerContainerTag
+                        sudo docker push $env.ProdDockerContainerTag
+                    '''
+                }
+            }
+        }
+        stage('Clean up'){
+            steps{
+                dir('files'){
+                    println 'Removing cloned GitHub repository'
+                    deleteDir()
+                }
+            }
+        }
+    }
+}
