@@ -36,7 +36,7 @@ pipeline {
                             Write-Host "No blue/green config detected, building generic container"
                             Write-Output $env:DevDockerContainerTag
                         }
-                    ''')
+                    ''').trim()
                     println "env.DevDockerContainerTagBlueGreen:"
                     println env.DevDockerContainerTagBlueGreen
                 }
