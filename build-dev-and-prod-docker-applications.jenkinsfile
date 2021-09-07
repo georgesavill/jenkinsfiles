@@ -18,9 +18,7 @@ pipeline {
             steps{
                 dir('files') {
                     println 'Cloning GitHub repository'
-                    script {
-                        pwsh 'git clone $env:GithubRepo -b $env:GithubBranch'
-                    }
+                    pwsh 'git clone $env:GithubRepo -b $env:GithubBranch'
                 }
             }
         }
