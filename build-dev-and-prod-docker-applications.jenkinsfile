@@ -34,7 +34,7 @@ pipeline {
                     } else {
                         Write-Output $env:DevDockerContainerTag
                     }
-                '''}
+                ''')
                 println "env.DevDockerContainerTagBlueGreen:"
                 println env.DevDockerContainerTagBlueGreen
             }
