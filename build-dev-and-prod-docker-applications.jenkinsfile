@@ -27,10 +27,13 @@ pipeline {
                 script {
                     env.DevDockerContainerTagBlueGreen = pwsh(returnStdout: true, script: '''
                         if (Test-Path $env:BlueNginxConfigLocation) {
+                            Write-Host "Blue is live, building green container"
                             Write-Output "$env:DevDockerContainerTag-green"
                         } elseif (Test-Path $env:GreenNginxConfigLocation) {
+                            Write-Host "Green is live, building blue container"
                             Write-Output "$env:DevDockerContainerTag-blue"
                         } else {
+                            Write-Host "No blue/green config detected, building generic container"
                             Write-Output $env:DevDockerContainerTag
                         }
                     ''')
