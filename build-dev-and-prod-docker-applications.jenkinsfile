@@ -9,6 +9,7 @@ pipeline {
         stage('Start'){
             steps{
                 dir('files'){
+                    echo sh(returnStdout: true, script: 'env|sort')
                     println 'Ensuring workspace is empty'
                     deleteDir()
                 }
