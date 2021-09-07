@@ -26,17 +26,19 @@ pipeline {
         }
         stage('Check blue/green deployment status'){
             steps{
-                env.DevDockerContainerTagBlueGreen = pwsh(returnStdout: true, script: '''
-                    if (Test-Path $env:BlueNginxConfigLocation) {
-                        Write-Output "$env:DevDockerContainerTag-green"
-                    } elseif (Test-Path $env:GreenNginxConfigLocation) {
-                        Write-Output "$env:DevDockerContainerTag-blue"
-                    } else {
-                        Write-Output $env:DevDockerContainerTag
-                    }
-                ''')
-                println "env.DevDockerContainerTagBlueGreen:"
-                println env.DevDockerContainerTagBlueGreen
+                script {
+                    env.DevDockerContainerTagBlueGreen = pwsh(returnStdout: true, script: '''
+                        if (Test-Path $env:BlueNginxConfigLocation) {
+                            Write-Output "$env:DevDockerContainerTag-green"
+                        } elseif (Test-Path $env:GreenNginxConfigLocation) {
+                            Write-Output "$env:DevDockerContainerTag-blue"
+                        } else {
+                            Write-Output $env:DevDockerContainerTag
+                        }
+                    ''')
+                    println "env.DevDockerContainerTagBlueGreen:"
+                    println env.DevDockerContainerTagBlueGreen
+                }
             }
         }
         stage('Build dev and prod dockerfiles'){
