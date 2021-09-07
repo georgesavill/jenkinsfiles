@@ -23,7 +23,10 @@ pipeline {
                 }
             }
         }
-        stage('Check blue/green deployment status'){
+        stage('Check blue/green deployment status on dev-server'){
+            agent{
+                label 'dev-server'
+            }
             steps{
                 script {
                     env.DevDockerContainerTagBlueGreen = pwsh(returnStdout: true, script: '''
