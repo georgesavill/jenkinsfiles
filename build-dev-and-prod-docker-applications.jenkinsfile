@@ -24,12 +24,27 @@ pipeline {
                 }
             }
         }
+        stage('Check blue/green deployment status'){
+            steps{
+                env.DevDockerContainerTagBlueGreen = pwsh(returnStdout: true, script: '''
+                    if (Test-Path $env:BlueNginxConfigLocation) {
+                        Write-Output "$env:DevDockerContainerTag-green"
+                    } elseif (Test-Path $env:GreenNginxConfigLocation) {
+                        Write-Output "$env:DevDockerContainerTag-blue"
+                    } else {
+                        Write-Output $env:DevDockerContainerTag
+                    }
+                '''}
+                println "env.DevDockerContainerTagBlueGreen:"
+                println env.DevDockerContainerTagBlueGreen
+            }
+        }
         stage('Build dev and prod dockerfiles'){
             steps{
                 dir('files' + ProjectDirectory){
                     println 'Building dockerfile'
                     pwsh '''
-                        sudo docker build -f $env:DevDockerfileLocation -t $env:DevDockerContainerTag .
+                        sudo docker build -f $env:DevDockerfileLocation -t $env:DevDockerContainerTagBlueGreen .
                         if ($env:NewRelicLicenseKey.length -ne 0) {
                             sudo docker build -f $env:ProdDockerfileLocation --build-arg new_relic_license_key=$env:NewRelicLicenseKey -t $env:ProdDockerContainerTag .
                         } else {
@@ -44,7 +59,7 @@ pipeline {
                 dir('files'){
                     println 'Pushing docker container'
                     pwsh '''
-                        sudo docker push $env:DevDockerContainerTag
+                        sudo docker push $env:DevDockerContainerTagBlueGreen
                         sudo docker push $env:ProdDockerContainerTag
                     '''
                 }
