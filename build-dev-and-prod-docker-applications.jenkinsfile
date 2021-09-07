@@ -30,7 +30,11 @@ pipeline {
                     println 'Building dockerfile'
                     pwsh '''
                         sudo docker build -f $env:DevDockerfileLocation -t $env:DevDockerContainerTag .
-                        sudo docker build -f $env:ProdDockerfileLocation --build-arg new_relic_license_key=$env:NewRelicLicenseKey -t $env:ProdDockerContainerTag .
+                        if ($env:NewRelicLicenseKey.length -ne 0) {
+                            sudo docker build -f $env:ProdDockerfileLocation --build-arg new_relic_license_key=$env:NewRelicLicenseKey -t $env:ProdDockerContainerTag .
+                        } else {
+                            sudo docker build -f $env:ProdDockerfileLocation -t $env:ProdDockerContainerTag .
+                        }
                     '''
                 }
             }
