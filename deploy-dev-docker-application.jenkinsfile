@@ -100,13 +100,23 @@ pipeline {
                     def nginxConfigUpdated = pwsh(returnStatus: true, script: '''
 
                         if ($env:LatestDockerContainerTag -Match "-green"){
-                            Write-Host "Blue is currently live, changing config to put green live"
-                            sudo mv "$env:GreenNginxConfigLocation" "$($env:GreenNginxConfigLocation).conf"
-                            sudo mv "$($env:BlueNginxConfigLocation).conf" "$env:BlueNginxConfigLocation"
+                            if (Test-Path $($env:BlueNginxConfigLocation).conf) {
+                                Write-Host "Blue is currently live, changing config to put green live"
+                                sudo mv "$env:GreenNginxConfigLocation" "$($env:GreenNginxConfigLocation).conf"
+                                sudo mv "$($env:BlueNginxConfigLocation).conf" "$env:BlueNginxConfigLocation"
+                            } else {
+                                Write-Host "Green config is already live, exiting"
+                                Exit 0
+                            }
                         } elseif ($env:LatestDockerContainerTag -Match "-blue") {
-                            Write-Host "Green is currently live, changing config to put blue live"
-                            sudo mv "$env:BlueNginxConfigLocation" "$($env:BlueNginxConfigLocation).conf"
-                            sudo mv "$($env:GreenNginxConfigLocation).conf" "$env:GreenNginxConfigLocation"
+                            if (Test-Path $($env:GreenNginxConfigLocation).conf) {
+                                Write-Host "Green is currently live, changing config to put blue live"
+                                sudo mv "$env:BlueNginxConfigLocation" "$($env:BlueNginxConfigLocation).conf"
+                                sudo mv "$($env:GreenNginxConfigLocation).conf" "$env:GreenNginxConfigLocation"
+                            } else {
+                                Write-Host "Blue config is already live, exiting"
+                                Exit 0
+                            }
                         } else {
                             Write-Host "No blue/green config, exiting"
                             Exit 0
