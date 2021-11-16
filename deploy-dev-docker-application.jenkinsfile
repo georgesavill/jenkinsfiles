@@ -45,13 +45,13 @@ pipeline {
                     pwsh '''
                         if ($env:LatestDockerContainerTag -Match "-green"){
                             Write-Host "Deploying -green docker container"
-                            sudo docker-compose -f $env:GreenDockerComposeLocation up
+                            sudo docker-compose -f $env:GreenDockerComposeLocation up -d
                         } elseif ($env:LatestDockerContainerTag -Match "-blue") {
                             Write-Host "Deploying -blue docker container"
-                            sudo docker-compose -f $env:BlueDockerComposeLocation up
+                            sudo docker-compose -f $env:BlueDockerComposeLocation up -d
                         } else {
                             Write-Host "Deploying generic latest docker container"
-                            sudo docker-compose -f $env:GenericDockerComposeLocation up
+                            sudo docker-compose -f $env:GenericDockerComposeLocation up -d
                         }
                     '''
                 }
