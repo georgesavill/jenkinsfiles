@@ -43,10 +43,10 @@ pipeline {
                 dir('files' + ProjectDirectory){
                     println 'Deploying new dev docker container'
                     pwsh '''
-                        if (env:LatestDockerContainerTag -Match "-green"){
+                        if ($env:LatestDockerContainerTag -Match "-green"){
                             Write-Host "Deploying -green docker container"
                             sudo docker-compose -f $env:GreenDockerComposeLocation up
-                        } elseif (env:LatestDockerContainerTag -Match "-blue") {
+                        } elseif ($env:LatestDockerContainerTag -Match "-blue") {
                             Write-Host "Deploying -blue docker container"
                             sudo docker-compose -f $env:BlueDockerComposeLocation up
                         } else {
