@@ -108,7 +108,7 @@ pipeline {
                                 sudo mv "$env:GreenNginxConfigLocation" "$($env:GreenNginxConfigLocation).conf"
                                 sudo mv "$($env:BlueNginxConfigLocation).conf" "$env:BlueNginxConfigLocation"
                                 Write-Host "Reloading NGINX config"
-                                docker exec nginx nginx -s reload
+                                docker exec -i nginx nginx -s reload
                             } else {
                                 Write-Host "Green config is already live, exiting"
                                 Exit 0
@@ -119,7 +119,7 @@ pipeline {
                                 sudo mv "$env:BlueNginxConfigLocation" "$($env:BlueNginxConfigLocation).conf"
                                 sudo mv "$($env:GreenNginxConfigLocation).conf" "$env:GreenNginxConfigLocation"
                                 Write-Host "Reloading NGINX config"
-                                docker exec nginx nginx -s reload
+                                docker exec -i nginx nginx -s reload
                             } else {
                                 Write-Host "Blue config is already live, exiting"
                                 Exit 0
