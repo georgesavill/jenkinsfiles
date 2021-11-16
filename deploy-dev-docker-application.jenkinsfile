@@ -152,7 +152,7 @@ pipeline {
                         } else {
                             Write-Host "No container to stop"
                         }
-                    ''')
+                    '''
                 }
             }
         }
