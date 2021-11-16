@@ -33,7 +33,7 @@ pipeline {
                         Write-Output $latestTag
                     ''').trim()
 
-                    println "env.LatestDockerContainerTag:"
+                    println 'env.LatestDockerContainerTag:'
                     println env.LatestDockerContainerTag
                 }
             }
@@ -54,6 +54,15 @@ pipeline {
                             sudo docker-compose -f $env:GenericDockerComposeLocation up -d
                         }
                     '''
+                    println 'Waiting for positive healthcheck result'
+                    def appHealthy = pwsh(returnStatus: true, script: '''
+                        exit 0
+                    ''')
+                    if (appHealthy != 0) {
+                        Error('Docker container failed to start')
+                    } else {
+                        println 'Docker container started OK'
+                    }
                 }
             }
         }
