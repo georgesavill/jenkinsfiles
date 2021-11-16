@@ -143,8 +143,16 @@ pipeline {
                 script {
                     println 'Stopping unused dev docker container'
                     pwsh '''
-                    
-                    '''
+                        if ($env:LatestDockerContainerTag -Match "-green"){
+                            Write-Host "Stopping -blue docker container"
+                            sudo docker-compose -f $env:BlueDockerComposeLocation down
+                        } elseif ($env:LatestDockerContainerTag -Match "-blue") {
+                            Write-Host "Stopping -green docker container"
+                            sudo docker-compose -f $env:GreenDockerComposeLocation down
+                        } else {
+                            Write-Host "No container to stop"
+                        }
+                    ''')
                 }
             }
         }
