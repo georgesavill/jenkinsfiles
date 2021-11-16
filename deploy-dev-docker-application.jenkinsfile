@@ -1,0 +1,78 @@
+#!groovy
+pipeline {
+    agent {
+        node {
+            label 'dev-server'
+        }
+    }
+    stages {
+        stage('Start'){
+            steps{
+                dir('files'){
+                    echo sh(returnStdout: true, script: 'env|sort')
+                    println 'Ensuring workspace is empty'
+                    deleteDir()
+                }
+            }
+        }
+        stage('Check blue/green deployment status'){
+            steps{
+                script {
+                    env.DevDockerContainerTagBlueGreen = pwsh(returnStdout: true, script: '''
+                        if (Test-Path $env:BlueNginxConfigLocation) {
+                            Write-Host "Blue is live, deploying green container"
+                            Write-Output "$env:DevDockerContainerTag-green"
+                        } elseif (Test-Path $env:GreenNginxConfigLocation) {
+                            Write-Host "Green is live, deploying blue container"
+                            Write-Output "$env:DevDockerContainerTag-blue"
+                        } else {
+                            Write-Host "No blue/green config detected, deploying generic container"
+                            Write-Output $env:DevDockerContainerTag
+                        }
+                    ''').trim()
+                    println "env.DevDockerContainerTagBlueGreen:"
+                    println env.DevDockerContainerTagBlueGreen
+
+                }
+            }
+        }
+        stage('Deploy dev docker container'){
+            steps{
+                dir('files' + ProjectDirectory){
+                    println 'Deploying new dev docker container'
+                    pwsh '''
+
+                    '''
+                }
+            }
+        }
+        stage ('Update NGINX config'){
+            steps{
+                dir('files'){
+                    println 'Updating NGINX config'
+                    pwsh '''
+                    
+                    '''
+                }
+            }
+        }
+        stage ('Stop unused docker container'){
+            steps{
+                dir('files'){
+                    println 'Stopping unused dev docker container'
+                    pwsh '''
+                    
+                    '''
+                }
+            }
+        }
+        stage('Clean up'){
+            steps{
+                dir('files'){
+                    println 'Removing cloned GitHub repository'
+                    deleteDir()
+                }
+            }
+        }
+    }
+}
