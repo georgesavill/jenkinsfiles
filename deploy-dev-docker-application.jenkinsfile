@@ -112,7 +112,7 @@ pipeline {
                         }
                     ''')
                     
-                    if (appDeplnginxConfigUpdatedoyed != 0) {
+                    if (nginxConfigUpdated != 0) {
                         error('NGINX config failed to update')
                     } else {
                         println 'NGINX config updated OK'
