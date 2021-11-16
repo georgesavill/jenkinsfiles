@@ -42,23 +42,50 @@ pipeline {
             steps{
                 script {
                     println 'Deploying new dev docker container'
-                    pwsh '''
+                    def appDeployed = pwsh(returnStatus: true, script: '''
+                        function Get-AppHealth {
+                            param (
+                                [Parameter(Mandatory=$true)] [string] $appHealthcheckUri,
+                                [Parameter(Mandatory=$false)] [int] $retryCount = 0
+                            )
+                            Write-Host "Checking app health"
+                            if ($retryCount -lt 15) {
+                                try {
+                                    $healthcheckResponse = (Invoke-WebRequest -Uri $appHealthcheckUri).Content
+                                    if ($healthcheckResponse.Contains("Healthy")) {
+                                        Write-Host "app healthy"
+                                        exit 0  
+                                    } else {
+                                        Write-Host "app NOT healthy"
+                                        exit 1
+                                    }
+                                } catch {
+                                    $delay = 5 * $retryCount
+                                    Write-Host "No response, waiting $delay seconds and retrying"
+                                    Start-Sleep -Seconds $delay
+                                    Get-AppHealth -appHealthcheckUri $appHealthcheckUri -retryCount ($retryCount + 1)
+                                }
+                            } else {
+                                exit 1
+                            }
+                        }
+
                         if ($env:LatestDockerContainerTag -Match "-green"){
                             Write-Host "Deploying -green docker container"
                             sudo docker-compose -f $env:GreenDockerComposeLocation up -d
+                            Get-AppHealth -appHealthcheckUri $env:GreenAppHealthcheckUri -retryCount 0
                         } elseif ($env:LatestDockerContainerTag -Match "-blue") {
                             Write-Host "Deploying -blue docker container"
                             sudo docker-compose -f $env:BlueDockerComposeLocation up -d
+                            Get-AppHealth -appHealthcheckUri $env:BlueAppHealthcheckUri -retryCount 0
                         } else {
                             Write-Host "Deploying generic latest docker container"
-                            sudo docker-compose -f $env:GenericDockerComposeLocation up -d
+                            sudo docker-compose -f $env:DockerComposeLocation up -d
+                            Get-AppHealth -appHealthcheckUri $env:AppHealthcheckUri -retryCount 0
                         }
-                    '''
-                    println 'Waiting for positive healthcheck result'
-                    def appHealthy = pwsh(returnStatus: true, script: '''
-                        exit 1
                     ''')
-                    if (appHealthy != 0) {
+
+                    if (appDeployed != 0) {
                         error('Docker container failed to start')
                     } else {
                         println 'Docker container started OK'
