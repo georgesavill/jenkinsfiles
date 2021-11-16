@@ -100,12 +100,12 @@ pipeline {
                     def nginxConfigUpdated = pwsh(returnStatus: true, script: '''
                         if (Test-Path $env:BlueNginxConfigLocation) {
                             Write-Host "Blue is currently live, changing config to put green live"
-                            mv "$env:BlueNginxConfigLocation" "$($env:BlueNginxConfigLocation).conf"
-                            mv "$($env:GreenNginxConfigLocation).conf" "$env:GreenNginxConfigLocation"
+                            sudo mv "$env:BlueNginxConfigLocation" "$($env:BlueNginxConfigLocation).conf"
+                            sudo mv "$($env:GreenNginxConfigLocation).conf" "$env:GreenNginxConfigLocation"
                         } elseif (Test-Path $env:GreenNginxConfigLocation) {
                             Write-Host "Green is currently live, changing config to put blue live"
-                            mv "$env:GreenNginxConfigLocation" "$($env:GreenNginxConfigLocation).conf"
-                            mv "$($env:BlueNginxConfigLocation).conf" "$env:BlueNginxConfigLocation"
+                            sudo mv "$env:GreenNginxConfigLocation" "$($env:GreenNginxConfigLocation).conf"
+                            sudo mv "$($env:BlueNginxConfigLocation).conf" "$env:BlueNginxConfigLocation"
                         } else {
                             Write-Host "No blue/green config detected, exiting"
                             Exit 0
