@@ -24,7 +24,7 @@ pipeline {
                         $latestTag = "latest"
                         foreach ($tag in $dockerContainerTagsJson.results) {
                             if ($env:DockerContainerTags.Contains($tag.name)) {
-                                if (get-date $latestPush) - lt (get-date $tag.tag_last_pushed) {
+                                if ((get-date $latestPush) -lt (get-date $tag.tag_last_pushed)) {
                                     $latestTag = $tag.name
                                     $latestPush = $tag.tag_last_pushed
                                 }
