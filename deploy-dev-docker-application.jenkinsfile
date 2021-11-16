@@ -72,14 +72,17 @@ pipeline {
 
                         if ($env:LatestDockerContainerTag -Match "-green"){
                             Write-Host "Deploying -green docker container"
+                            sudo docker-compose -f $env:GreenDockerComposeLocation pull
                             sudo docker-compose -f $env:GreenDockerComposeLocation up -d
                             Get-AppHealth -appHealthcheckUri $env:GreenAppHealthcheckUri -retryCount 0
                         } elseif ($env:LatestDockerContainerTag -Match "-blue") {
                             Write-Host "Deploying -blue docker container"
+                            sudo docker-compose -f $env:BlueDockerComposeLocation pull
                             sudo docker-compose -f $env:BlueDockerComposeLocation up -d
                             Get-AppHealth -appHealthcheckUri $env:BlueAppHealthcheckUri -retryCount 0
                         } else {
                             Write-Host "Deploying generic latest docker container"
+                            sudo docker-compose -f $env:DockerComposeLocation pull
                             sudo docker-compose -f $env:DockerComposeLocation up -d
                             Get-AppHealth -appHealthcheckUri $env:AppHealthcheckUri -retryCount 0
                         }
