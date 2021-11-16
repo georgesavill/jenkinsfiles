@@ -56,7 +56,7 @@ pipeline {
                     '''
                     println 'Waiting for positive healthcheck result'
                     def appHealthy = pwsh(returnStatus: true, script: '''
-                        exit 0
+                        exit 1
                     ''')
                     if (appHealthy != 0) {
                         Error('Docker container failed to start')
