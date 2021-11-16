@@ -95,7 +95,7 @@ pipeline {
         }
         stage ('Update NGINX config'){
             steps{
-                dir('files'){
+                script {
                     println 'Updating NGINX config'
                     def nginxConfigUpdated = pwsh(returnStatus: true, script: '''
                         if (Test-Path $env:BlueNginxConfigLocation) {
@@ -122,7 +122,7 @@ pipeline {
         }
         stage ('Stop unused docker container'){
             steps{
-                dir('files'){
+                script {
                     println 'Stopping unused dev docker container'
                     pwsh '''
                     
