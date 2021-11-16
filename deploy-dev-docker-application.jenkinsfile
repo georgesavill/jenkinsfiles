@@ -15,6 +15,14 @@ pipeline {
                 }
             }
         }
+        stage('Pull changes from git'){
+            steps{
+                dir(ProjectGitRepoLocation){
+                    println 'Pulling changes from git'
+                    pwsh 'git pull'
+                }
+            }
+        }
         stage('Check which container is latest'){
             steps{
                 script {
