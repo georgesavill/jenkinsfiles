@@ -40,7 +40,7 @@ pipeline {
         }
         stage('Deploy new dev docker container'){
             steps{
-                dir(ProjectDirectory){
+                script {
                     println 'Deploying new dev docker container'
                     pwsh '''
                         if ($env:LatestDockerContainerTag -Match "-green"){
