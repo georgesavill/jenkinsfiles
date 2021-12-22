@@ -34,7 +34,7 @@ pipeline {
                                 $Headers = @{
                                     Authorization = "Basic $encodedCreds"
                                 }
-                                Invoke-WebRequest -Uri $env:DockerEnvFileLocation -Headers $Headers | Out-Null
+                                Invoke-WebRequest -Uri $env:DockerEnvFileLocation -Headers $Headers -OutFile '.env' | Out-Null
                             ''')
                             if (status != 0) {
                                 error('WebRequest FAILED')
