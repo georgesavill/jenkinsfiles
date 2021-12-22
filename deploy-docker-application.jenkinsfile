@@ -1,0 +1,37 @@
+#!groovy
+pipeline {
+    agent {
+        node {
+            label DeploymentTarget
+        }
+    }
+    stages {
+        stage('Pull changes from git'){
+            steps{
+                dir(ProjectGitRepoLocation){
+                    println 'Pulling changes from git'
+                    pwsh 'git pull'
+                }
+            }
+        }
+        stage('Deploy docker container'){
+            steps{
+                dir(ProjectGitRepoLocation){
+                    println 'Deploying docker container'
+                    def appDeployed = pwsh(returnStatus: true, script: '''
+                            Write-Host "Deploying  docker container"
+                            sudo docker-compose -f $env:DockerComposeLocation pull
+                            sudo docker-compose -f $env:DockerComposeLocation up -d
+                    ''')
+
+                    if (appDeployed != 0) {
+                        error('Docker container failed to start')
+                    } else {
+                        println 'Docker container started OK'
+                    }
+                }
+            }
+        }
+       
+    }
+}
