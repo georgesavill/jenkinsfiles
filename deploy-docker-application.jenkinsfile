@@ -6,32 +6,73 @@ pipeline {
         }
     }
     stages {
-        stage('Pull changes from git'){
+        stage('Start'){
             steps{
-                dir(ProjectGitRepoLocation){
-                    println 'Pulling changes from git'
-                    pwsh 'git pull'
+                dir('files'){
+                    echo sh(returnStdout: true, script: 'env|sort')
+                    println 'Ensuring workspace is empty'
+                    deleteDir()
+                }
+            }
+        }
+        stage('Clone repository from GitHub'){
+            steps{
+                dir('files') {
+                    println 'Cloning GitHub repository'
+                    pwsh 'git clone $env:GithubRepo -b $env:GithubBranch'
+                }
+            }
+        }
+        stage('Get docker .env file'){
+            steps{
+                dir('files' + ProjectDirectory){
+                    script{
+                        println 'Getting docker .env file'
+                        withCredentials([string(credentialsId: 'nexus-admin-password', variable: 'nexusAdminPassword')]) {
+                            def status = pwsh(returnStatus: true, script: '''
+                                $encodedCreds = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes("admin:$env:nexusAdminPassword"))
+                                $Headers = @{
+                                    Authorization = "Basic $encodedCreds"
+                                }
+                                Invoke-WebRequest -Uri $env:DockerEnvFileLocation -Headers $Headers | Out-Null
+                            ''')
+                            if (status != 0) {
+                                error('WebRequest FAILED')
+                            } else {
+                                println 'WebRequest OK'
+                            }
+                        }
+                    }
                 }
             }
         }
         stage('Deploy docker container'){
             steps{
-                dir(ProjectGitRepoLocation){
-                    println 'Deploying docker container'
-                    def appDeployed = pwsh(returnStatus: true, script: '''
-                            Write-Host "Deploying  docker container"
-                            sudo docker-compose -f $env:DockerComposeLocation pull
-                            sudo docker-compose -f $env:DockerComposeLocation up -d
-                    ''')
+                dir('files' + ProjectDirectory){
+                    script{
+                        println 'Deploying docker container'
+                        def appDeployed = pwsh(returnStatus: true, script: '''
+                                Write-Host "Deploying  docker container"
+                                sudo docker-compose -f $env:DockerComposeLocation -p $env:DockerProjectName pull
+                                sudo docker-compose -f $env:DockerComposeLocation -p $env:DockerProjectName up -d
+                        ''')
 
-                    if (appDeployed != 0) {
-                        error('Docker container failed to start')
-                    } else {
-                        println 'Docker container started OK'
+                        if (appDeployed != 0) {
+                            error('Docker container failed to start')
+                        } else {
+                            println 'Docker container started OK'
+                        }
                     }
                 }
             }
         }
-       
+        stage('Clean up'){
+            steps{
+                dir('files'){
+                    println 'Removing cloned GitHub repository'
+                    deleteDir()
+                }
+            }
+        }
     }
 }
